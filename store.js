@@ -1,4 +1,11 @@
 var Promise = require('bluebird');
+var Zillow = require('node-zillow');
+
+var zillow = new Zillow('X1-ZWz1fzk9uixlhn_634pbd');
+
+var parameters = {
+    zpid: 1111111
+  };
 
 var ReviewsOptions = [
     '“Very stylish, great stay, great staff”',
@@ -24,6 +31,11 @@ module.exports = {
                     image: 'https://placeholdit.imgix.net/~text?txtsize=35&txt=Hotel+' + i + '&w=500&h=260'
                 });
             }
+
+            zillow.get('GetRegionChildren', parameters)
+                .then(function(results){
+                    console.log(results);
+                })
 
             hotels.sort(function (a, b) { return a.priceStarting - b.priceStarting; });
 

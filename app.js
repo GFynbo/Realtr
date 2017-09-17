@@ -77,7 +77,17 @@ bot.dialog('Hi', function(session, args) {
 
 bot.dialog('FindApartments', [
   function (session, args, next) {
-      session.send('Welcome to the Apartment finder! We are analyzing your message: \'%s\'', session.message.text);
+      session.send({text: "",
+          attachments: [
+              {
+              contentUrl: "https://pbs.twimg.com/profile_images/668279339838935040/8sUE9d4C.jpg",
+              contentType: "image/jpg",
+              name: "Tyrion.jpg"
+              }
+          ]
+      });
+
+      session.send('The apartment search has begun! We are decrypting your message and sending a raven containing: \'%s\'', session.message.text);
 
       // try extracting entities
       var cityEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.geography.city');
@@ -124,6 +134,16 @@ bot.dialog('FindApartments', [
 
 // help command
 bot.dialog('Help', function (session) {
+  session.send({text: "",
+    attachments: [
+        {
+        contentUrl: "https://s-media-cache-ak0.pinimg.com/originals/a8/50/f3/a850f3e582a8768568033a27f4d89e9d.jpg",
+        contentType: "image/jpg",
+        name: "Tyrion.jpg"
+        }
+    ]
+  });
+  
   session.endDialog('Don\'t feel bad, Sansa asks me all the time. Try asking me things like \'find apartments in Cambridge\' or \'find apartments near Boston University\'');
 }).triggerAction({
   matches: 'Help'
