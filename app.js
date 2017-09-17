@@ -3,7 +3,8 @@
 var restify = require('restify');
 var builder = require('botbuilder');
 var Store = require('./store');
-const LUIS_APP_URL = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d3b4d78d-c051-451f-b0f2-4d86b381a8ef?subscription-key=35e4c714b5004788b7e877a86cc8858f&timezoneOffset=0&verbose=true&q='
+const LUIS_APP_URL = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d3b4d78d-c051-451f-b0f2-4d86b381a8ef?subscription-key=2ebc9c4a80dc4968bdd6425f14ec8019&timezoneOffset=0&verbose=true&q='
+
 
 var server = restify.createServer();
 
@@ -21,6 +22,11 @@ server.post('/api/messages', connector.listen());
 
 var bot = new builder.UniversalBot(connector, function (session) {
   session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
+});
+
+// google api
+var googleMapsClient = require('@google/maps').createClient({
+    key: 'AIzaSyDBjktTNauyQEUuB2H5rmZQMwLP_CX5W6w'
 });
 
 
@@ -48,7 +54,7 @@ bot.recognizer({
 
 // You can provide your own model by specifing the 'LUIS_MODEL_URL' environment variable
 // This Url can be obtained by uploading or creating your model from the LUIS portal: https://www.luis.ai/
-var luisAppUrl = process.env.LUIS_APP_URL || 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d3b4d78d-c051-451f-b0f2-4d86b381a8ef?subscription-key=35e4c714b5004788b7e877a86cc8858f&timezoneOffset=0&verbose=true&q=';
+var luisAppUrl = process.env.LUIS_APP_URL || 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d3b4d78d-c051-451f-b0f2-4d86b381a8ef?subscription-key=2ebc9c4a80dc4968bdd6425f14ec8019&timezoneOffset=0&verbose=true&q=';
 bot.recognizer(new builder.LuisRecognizer(luisAppUrl));
 
 // root dialog
@@ -74,6 +80,41 @@ bot.dialog('Hi', function(session, args) {
   matches: 'Hi'
 });
 
+bot.dialog('Nearby', [
+    function (session, args, next) {
+        session.send('Give me one second and I promise I wont dissapoint.', session.message.text);
+
+        // try extracting entities
+        var nearbyEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.transportation', 'builtin.food');
+        if (nearbyEntity) {
+            // city entity detected, continue to next step
+            session.dialogData.searchType = 'builtin.transportation', 'builtin.food';
+            next({ response: nearbyEntity.entity });
+        } else {
+            // no entities detected, ask user for a destination
+            builder.Prompts.text(session, 'What did you want to find?');
+        }
+    },
+    function (session, results) {
+        var destination = results.response;
+
+        var message = "I'll be back after some drinks";
+
+        session.send(message, destination);
+
+        // Async search
+        Store
+            .searchNearby(object)
+            .then(function (object) {
+
+            });
+    }
+]).triggerAction({
+    matches: 'Nearby',
+    onInterrupted: function (session) {
+        session.send('What did you want to find?');
+    }
+});
 
 bot.dialog('FindApartments', [
   function (session, args, next) {

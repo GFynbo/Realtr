@@ -24,6 +24,12 @@
   "homepage": "https://github.com/GFynbo/Realtr#readme",
   "dependencies": {
     "botbuilder": "^3.9.1",
+    "googleapis": "^21.3.0",
+    "jasmine-node": "^1.14.5",
+    "request": "^2.81.0",
     "restify": "^6.0.0"
+  },
+  "devDependencies": {
+    "jasmine": "^2.8.0"
   }
 }
