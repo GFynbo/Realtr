@@ -230,6 +230,57 @@ bot.dialog('ValueOf', [
     }
 });
 
+bot.dialog('WutUp', [
+    function (session, args, next) {
+        session.send({text: "",
+            attachments: [
+                {
+                    contentUrl: "https://pbs.twimg.com/profile_images/668279339838935040/8sUE9d4C.jpg",
+                    contentType: "image/jpg",
+                    name: "Tyrion.jpg"
+                }
+            ]
+        });
+
+        session.send('Sorry, I only have so many braincells left. I have to think about that one... ', session.message.text);
+
+        // try extracting entities
+        var valueEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.sentiment');
+        if (valueEntity) {
+            // city entity detected, continue to next step
+            session.dialogData.searchType = 'question';
+            next({ response: cityEntity.entity });
+        } else {
+            // no entities detected, ask user for a destination
+            builder.Prompts.text(session, 'So, you want to know how I\'m feeling, what\'s going on in my crown sized head?.');
+        }
+    },
+    function (session, results) {
+        var destination = results.response;
+
+        var message = 'I\'m miserable, all I do is answer your questions';
+        message += ' ...';
+
+        session.send(message, destination);
+
+        // Async search
+        Store
+            .searchApartments(destination)
+            .then(function (apartments) {
+                // args
+                session.send('What else do you want to know?' );
+                
+                // End
+                session.endDialog();
+            });
+    }
+]).triggerAction({
+    matches: 'General',
+    onInterrupted: function (session) {
+        session.send('Another?');
+    }
+});
+
 // help command
 bot.dialog('Help', function (session) {
   session.send({text: "",
