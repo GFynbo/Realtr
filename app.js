@@ -173,6 +173,63 @@ bot.dialog('FindApartments', [
   }
 });
 
+bot.dialog('ValueOf', [
+    function (session, args, next) {
+        session.send({text: "",
+            attachments: [
+                {
+                    contentUrl: "https://pbs.twimg.com/profile_images/668279339838935040/8sUE9d4C.jpg",
+                    contentType: "image/jpg",
+                    name: "Tyrion.jpg"
+                }
+            ]
+        });
+
+        session.send('One momemnt while I see how much money you shouldn\'t spend on this piece of rubbish... I mean this lovely home!', session.message.text);
+
+        // try extracting entities
+        var valueEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.quantity');
+        if (valueEntity) {
+            // city entity detected, continue to next step
+            session.dialogData.searchType = 'money';
+            next({ response: cityEntity.entity });
+        } else {
+            // no entities detected, ask user for a destination
+            builder.Prompts.text(session, 'Please specify what you want me to appreciate.');
+        }
+    },
+    function (session, results) {
+        var destination = results.response;
+
+        var message = 'Let me think';
+        message += ' ...';
+
+        session.send(message, destination);
+
+        // Async search
+        Store
+            .searchApartments(destination)
+            .then(function (apartments) {
+                // args
+                session.send('It\'s worth about, $5,999, you shoulde be lucky to find one so cheap /S' );
+
+                var message = new builder.Message()
+                    .attachmentLayout(builder.AttachmentLayout.carousel)
+                    .attachments(apartments.map(apartmentAsAttachment));
+
+                session.send(message);
+
+                // End
+                session.endDialog();
+            });
+    }
+]).triggerAction({
+    matches: 'Value',
+    onInterrupted: function (session) {
+        session.send('Another?');
+    }
+});
+
 // help command
 bot.dialog('Help', function (session) {
   session.send({text: "",
